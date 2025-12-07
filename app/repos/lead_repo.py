@@ -10,9 +10,10 @@ class LeadRepo:
 
     def create(self, name: str, email: str = None):
         lead = Lead(name=name, email=email)
-        self.db.add(lead)
-        self.db.commit()
-        self.db.refresh(lead)
+        with self.db.begin():
+            self.db.add(lead)
+            self.db.flush()      # ensure PK is assigned inside the open transaction
+            self.db.refresh(lead)
         return lead
 
     def list_all(self, limit=100):
